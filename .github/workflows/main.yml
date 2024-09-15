@@ -28,9 +28,3 @@ jobs:
 
     - name: Build project
       run: npm run build
-      env:
-        VITE_ENDPOINT_URL: ${{ secrets.VITE_ENDPOINT_URL }}
-
-    - name: Print Environment Variables
-      run: |
-        echo "VITE_ENDPOINT_URL=${{ secrets.VITE_ENDPOINT_URL }}"
