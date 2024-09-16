@@ -60,8 +60,9 @@ function Home() {
       hasError = true;
     }
 
-    if (!feedbackError) {
+    if (!feedback) {
       setFeedbackError("This field is required.");
+      hasError = true;
     }
 
     if (hasError) {
@@ -77,6 +78,7 @@ function Home() {
           name: name,
           jobTitle: jobTitle,
           dateOfBirth: dateOfBirthObject,
+          feedback: feedback,
         },
         {
           headers: {
@@ -85,6 +87,7 @@ function Home() {
         }
       );
       showSuccessToast();
+      resetFields();
       console.log(result);
     } catch (error) {
       console.error(error);
@@ -93,6 +96,18 @@ function Home() {
       setLoading(false);
     }
   };
+
+  function resetFields() {
+    setName("");
+    setJobTitle("");
+    setFeedback("");
+    setDateOfBirth(new Date().toISOString().split("T")[0]);
+    setNameError("");
+    setJobTitleError("");
+    setDateOfBirthError("");
+    setFeedbackError("");
+    setError("");
+  }
 
   return (
     <>
@@ -186,7 +201,7 @@ function Home() {
                   className="h-5 w-5 m-auto"
                 />
               ) : (
-                "Register"
+                "Submit"
               )}
             </button>
 
