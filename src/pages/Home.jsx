@@ -73,7 +73,7 @@ function Home() {
     const dateOfBirthObject = new Date(dateOfBirth);
     try {
       const result = await axios.post(
-        "https://me-central2-sultankh-sultankhub.cloudfunctions.net/createRecord",
+        "YOUR_CLOUD_FUNCTION_URL",
         {
           name: name,
           jobTitle: jobTitle,
