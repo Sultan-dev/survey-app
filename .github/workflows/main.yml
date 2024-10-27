@@ -1,11 +1,13 @@
-name: Node.js CI
+name: Build and Deploy to GCloud Storage
 
 on:
   pull_request:
     branches: [ "main" ]
+  push:
+    branches: [ "main" ]
 
 jobs:
-  build:
+  build_and_upload:
     runs-on: ubuntu-latest
 
     strategy:
@@ -13,22 +15,36 @@ jobs:
         node-version: [20.x]
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v4.0.3
-      with:
-        node-version: ${{ matrix.node-version }}
+      - name: Set up Node.js
+        uses: actions/setup-node@v4.0.3
+        with:
+          node-version: ${{ matrix.node-version }}
 
-    - name: Install dependencies
-      run: npm install
+      - name: Install dependencies
+        run: npm install
 
-    - name: Build project
-      run: npm run build
-    
-    - name: Upload build artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: react-build
-        path: dist/server/
+      - name: Build project
+        run: npm run build
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          install_components: gsutil
+
+      - name: Sync files to GCS
+        run: |
+          if [ -d "dist/server/" ]; then
+            gsutil -m rsync -r dist/server/ gs://survey-app-build/
+          else
+            echo "Directory dist/server/ does not exist."
+            exit 1
+          fi
