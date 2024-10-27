@@ -1,0 +1,32 @@
+name: Deploy to GCloud Storage
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: react-build
+          path: deployment/
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          install_components: gsutil
+
+      - name: Sync versioned folder to GCS
+        run: |
+          VERSION=$(ls deployment)  # Get the version folder dynamically
+          gsutil -m rsync -r deployment/${VERSION}/ gs://survey-app-build/${VERSION}/
