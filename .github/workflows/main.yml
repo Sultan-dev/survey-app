@@ -39,7 +39,7 @@ jobs:
         run: |
           mkdir -p deployment/${{ env.VERSION }}
           cp -r dist/ deployment/${{ env.VERSION }}/dist
-          cp index.js deployment/${{ env.VERSION }}/
+          cp server.js deployment/${{ env.VERSION }}/
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v1
