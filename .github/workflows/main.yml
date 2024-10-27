@@ -29,6 +29,18 @@ jobs:
       - name: Build project
         run: npm run build
 
+      - name: Generate date-based version
+        id: version
+        run: |
+          VERSION=$(date +"%Y%m%d-%H%M%S")
+          echo "VERSION=v${VERSION}" >> $GITHUB_ENV
+
+      - name: Prepare deployment folder
+        run: |
+          mkdir -p deployment/${{ env.VERSION }}
+          cp -r dist/ deployment/${{ env.VERSION }}/dist
+          cp server.js deployment/${{ env.VERSION }}/
+
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v1
         with:
@@ -40,11 +52,6 @@ jobs:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
           install_components: gsutil
 
-      - name: Sync files to GCS
+      - name: Sync versioned folder to GCS
         run: |
-          if [ -d "dist/server/" ]; then
-            gsutil -m rsync -r dist/server/ gs://survey-app-build/
-          else
-            echo "Directory dist/server/ does not exist."
-            exit 1
-          fi
+          gsutil -m rsync -r deployment/${{ env.VERSION }}/ gs://survey-app-build/${{ env.VERSION }}/
