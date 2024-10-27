@@ -1,13 +1,11 @@
-name: Build and Deploy to GCloud Storage
+name: Build and Save Artifacts
 
 on:
   pull_request:
     branches: [ "main" ]
-  push:
-    branches: [ "main" ]
 
 jobs:
-  build_and_upload:
+  build:
     runs-on: ubuntu-latest
 
     strategy:
@@ -41,17 +39,8 @@ jobs:
           cp -r dist/ deployment/${{ env.VERSION }}/dist
           cp server.js deployment/${{ env.VERSION }}/
 
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v1
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v3
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
-
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v1
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          install_components: gsutil
-
-      - name: Sync versioned folder to GCS
-        run: |
-          gsutil -m rsync -r deployment/${{ env.VERSION }}/ gs://survey-app-build/${{ env.VERSION }}/
+          name: react-build
+          path: deployment/${{ env.VERSION }}
