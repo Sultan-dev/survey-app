@@ -15,7 +15,9 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: react-build
-          path: deployment/
+          path: deployment
+          github-token: ${{ github.token }}
+          repository: ${{github.repository}}
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v1
