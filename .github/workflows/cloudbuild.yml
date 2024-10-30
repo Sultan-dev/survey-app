@@ -1,7 +1,10 @@
 name: Deploy to GCloud Storage
 
 on:
-  workflow_dispatch:
+  workflow_run:
+    workflows: [Build and Save Artifacts]
+    types: [completed]
+    branches: [main]
 
 jobs:
   deploy:
@@ -12,12 +15,12 @@ jobs:
         id: download-artifact
         uses: dawidd6/action-download-artifact@v6
         with:
-          path: deployment
+          run_id: ${{ github.event.workflow_run.id }}
+          path: ./deployment
           name: react-build
           github_token: ${{ github.token }}
           repo: ${{github.repository}}
-          workflow: main.yaml
-          workflow_conclusion: completed
+          search_artifact: true
           
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v1
