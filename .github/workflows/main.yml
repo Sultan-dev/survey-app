@@ -2,7 +2,7 @@ name: Build and Save Artifacts
 
 on:
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build:
@@ -27,20 +27,20 @@ jobs:
       - name: Build project
         run: npm run build
 
-      # - name: Generate date-based version
-      #   id: version
-      #   run: |
-      #     VERSION=$(date +"%Y%m%d-%H%M%S")
-      #     echo "VERSION=v${VERSION}" >> $GITHUB_ENV
+      - name: Generate date-based version
+        id: version
+        run: |
+          VERSION=$(date +"%Y%m%d-%H%M%S")
+          echo "VERSION=v${VERSION}" >> $GITHUB_ENV
 
-      # - name: Prepare deployment folder
-      #   run: |
-      #     mkdir -p deployment/${{ env.VERSION }}
-      #     cp -r dist/ deployment/${{ env.VERSION }}/dist
-      #     cp server.js deployment/${{ env.VERSION }}/
+      - name: Prepare deployment folder
+        run: |
+          mkdir -p deployment/${{ env.VERSION }}
+          cp -r dist/ deployment/${{ env.VERSION }}/dist
+          cp server.js deployment/${{ env.VERSION }}/
 
-      # - name: Upload build artifact
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: react-build
-      #     path: deployment/${{ env.VERSION }}
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: react-build
+          path: deployment/${{ env.VERSION }}
