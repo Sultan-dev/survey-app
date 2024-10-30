@@ -1,10 +1,7 @@
 name: Deploy to GCloud Storage
 
 on:
-  workflow_run:
-    workflows: ["Build and Save Artifacts"]
-    types:
-      - completed
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -12,11 +9,16 @@ jobs:
 
     steps:
       - name: Download build artifact
-        uses: actions/download-artifact@v3
+        id: download-artifact
+        uses: dawidd6/action-download-artifact@v6
         with:
+          path: deployment
           name: react-build
-          path: deployment/
-
+          github_token: ${{ github.token }}
+          repo: ${{github.repository}}
+          workflow: main.yaml
+          workflow_conclusion: completed
+          
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v1
         with:
@@ -28,7 +30,7 @@ jobs:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
           install_components: gsutil
 
-      - name: Sync versioned folder to GCS
+      - name: Sync versioned folder to Cloud Storage
         run: |
           VERSION=$(ls deployment)  # Get the version folder dynamically
           gsutil -m rsync -r deployment/${VERSION}/ gs://survey-app-build/${VERSION}/
