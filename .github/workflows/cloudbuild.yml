@@ -20,7 +20,7 @@ jobs:
           name: react-build
           github_token: ${{ github.token }}
           repo: ${{github.repository}}
-          search_artifact: true
+          search_artifacts: true
           
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v1
