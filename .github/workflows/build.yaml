@@ -1,4 +1,4 @@
-name: Build and Save Artifacts
+name: Build React Project
 
 on:
   pull_request:
