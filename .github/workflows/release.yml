@@ -1,4 +1,4 @@
-name: Build, Version, and Deploy to Google Cloud Storage
+name: Build, Version, and Deploy to GCloud Storage
 
 on:
   push:
@@ -33,20 +33,20 @@ jobs:
         run: |
           latest_tag=$(git tag --list "v*" --sort=-v:refname | head -n 1)
           if [ -z "$latest_tag" ]; then
-            new_version="1.0.0"
+            new_version="0.0.1"  # Default to 0.0.1 for the first release
           else
             IFS='.' read -r major minor patch <<< "${latest_tag#v}"
             patch=$((patch + 1))
             new_version="${major}.${minor}.${patch}"
           fi
           echo "NEW_VERSION=v${new_version}" >> $GITHUB_ENV
-          echo "new_version=v${new_version}" >> $GITHUB_ENV
+          echo "new_version=${new_version}" >> $GITHUB_ENV
           echo "New version will be: $new_version"
 
       - name: Tag the new release
         run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
+          git config user.name "Sultan-dev"
+          git config user.email "Sultan.Bus@outlook.com"
           git tag ${{ env.NEW_VERSION }}
           git push origin ${{ env.NEW_VERSION }}
 
