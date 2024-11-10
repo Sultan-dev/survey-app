@@ -1,0 +1,82 @@
+name: Build, Version, and Deploy to GCloud Storage
+
+on:
+  push:
+    branches: ["release"]
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4.0.3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build
+
+      - name: Get latest release version
+        id: get_version
+        run: |
+          latest_tag=$(git tag --list "v*" --sort=-v:refname | head -n 1)
+          if [ -z "$latest_tag" ]; then
+            new_version="1.0.0"
+          else
+            IFS='.' read -r major minor patch <<< "${latest_tag#v}"
+            patch=$((patch + 1))
+            new_version="${major}.${minor}.${patch}"
+          fi
+          echo "NEW_VERSION=v${new_version}" >> $GITHUB_ENV
+          echo "new_version=v${new_version}" >> $GITHUB_ENV
+          echo "New version will be: $new_version"
+
+      - name: Tag the new release
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git tag ${{ env.NEW_VERSION }}
+          git push origin ${{ env.NEW_VERSION }}
+
+      - name: Prepare deployment folder
+        run: |
+          mkdir -p deployment/${{ env.NEW_VERSION }}
+          cp -r dist/ deployment/${{ env.NEW_VERSION }}/dist
+          cp server.js deployment/${{ env.NEW_VERSION }}/
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          install_components: gsutil
+
+      - name: Sync versioned folder to Cloud Storage
+        run: |
+          gsutil -m rsync -r deployment/${{ env.NEW_VERSION }}/ gs://survey-app-build/${{ env.NEW_VERSION }}/
+
+      - name: Create GitHub release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ env.NEW_VERSION }}
+          release_name: "Release ${{ env.NEW_VERSION }}"
+          body: "This is release ${{ env.NEW_VERSION }}."
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
