@@ -17,6 +17,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Fetch all tags
+        run: git fetch --tags
+
       - name: Set up Node.js
         uses: actions/setup-node@v4.0.3
         with:
@@ -43,10 +46,21 @@ jobs:
           echo "new_version=${new_version}" >> $GITHUB_ENV
           echo "New version will be: $new_version"
 
-      - name: Tag the new release
+      - name: Check if tag exists in the remote
+        id: check_tag
         run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
+          if git ls-remote --tags origin | grep -q "refs/tags/${{ env.NEW_VERSION }}"; then
+            echo "Tag ${{ env.NEW_VERSION }} already exists in the remote."
+            exit 1  # Fail the job if the tag already exists
+          else
+            echo "Tag ${{ env.NEW_VERSION }} does not exist in the remote."
+          fi
+
+      - name: Tag the new release
+        if: steps.check_tag.outcome == 'success'
+        run: |
+          git config user.name "Sultan-dev"
+          git config user.email "Sultan.Bus@outlook.com"
           git tag ${{ env.NEW_VERSION }}
           git push origin ${{ env.NEW_VERSION }}
 
@@ -75,6 +89,7 @@ jobs:
 
       - name: Create GitHub release
         uses: actions/create-release@v1
+        if: steps.check_tag.outcome == 'success'
         with:
           tag_name: ${{ env.NEW_VERSION }}
           release_name: "Release ${{ env.NEW_VERSION }}"
