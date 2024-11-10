@@ -45,8 +45,8 @@ jobs:
 
       - name: Tag the new release
         run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
+          git config user.name "Sultan-dev"
+          git config user.email "Sultan.Bus@outlook.com"
           git tag ${{ env.NEW_VERSION }}
           git push origin ${{ env.NEW_VERSION }}
 
