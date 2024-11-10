@@ -3,7 +3,7 @@ name: Build, Version, and Deploy to GCloud Storage
 on:
   push:
     branches:
-      - 'release*'
+      - "release*"
 
 jobs:
   build_and_deploy:
@@ -45,8 +45,8 @@ jobs:
 
       - name: Tag the new release
         run: |
-          git config user.name "Sultan-dev"
-          git config user.email "Sultan.Bus@outlook.com"
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
           git tag ${{ env.NEW_VERSION }}
           git push origin ${{ env.NEW_VERSION }}
 
@@ -55,6 +55,8 @@ jobs:
           mkdir -p deployment/${{ env.NEW_VERSION }}
           cp -r dist/ deployment/${{ env.NEW_VERSION }}/dist
           cp server.js deployment/${{ env.NEW_VERSION }}/
+          cp package.json deployment/${{ env.NEW_VERSION }}/
+          cp package-lock.json deployment/${{ env.NEW_VERSION }}/
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v1
