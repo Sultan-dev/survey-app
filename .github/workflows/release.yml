@@ -43,7 +43,18 @@ jobs:
           echo "new_version=${new_version}" >> $GITHUB_ENV
           echo "New version will be: $new_version"
 
+      - name: Check if tag exists
+        id: check_tag
+        run: |
+          if git rev-parse "refs/tags/${{ env.NEW_VERSION }}" >/dev/null 2>&1; then
+            echo "Tag ${{ env.NEW_VERSION }} already exists."
+            exit 1  # Fail the job if the tag already exists
+          else
+            echo "Tag ${{ env.NEW_VERSION }} does not exist."
+          fi
+
       - name: Tag the new release
+        if: steps.check_tag.outcome == 'success'
         run: |
           git config user.name "Sultan-dev"
           git config user.email "Sultan.Bus@outlook.com"
@@ -75,6 +86,7 @@ jobs:
 
       - name: Create GitHub release
         uses: actions/create-release@v1
+        if: steps.check_tag.outcome == 'success'
         with:
           tag_name: ${{ env.NEW_VERSION }}
           release_name: "Release ${{ env.NEW_VERSION }}"
