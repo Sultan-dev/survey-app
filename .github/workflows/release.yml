@@ -1,8 +1,9 @@
-name: Build, Version, and Deploy to GCloud Storage
+name: Build, Version, and Deploy to Google Cloud Storage
 
 on:
   push:
-    branches: ["release"]
+    branches:
+      - 'release*'
 
 jobs:
   build_and_deploy:
