@@ -3,12 +3,11 @@ name: Build React Project
 on:
   pull_request:
     branches:
-      - "main"
-    branches-ignore:
-      - "release*"
+      - "*"
 
 jobs:
   build:
+    if: github.base_ref == 'main' && !startsWith(github.head_ref, 'release')
     runs-on: ubuntu-latest
 
     strategy:
